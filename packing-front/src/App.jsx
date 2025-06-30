@@ -91,30 +91,6 @@ export default function RegistroEstuches() {
 
 
 
-  const enviarFormulario = async (esProblema = false, problema = "") => {
-    try {
-      await axios.post("http://localhost:8002/problemas", {
-        ...formData,
-        es_problema: esProblema,
-        problema,
-        uc_planificado: parseInt(formData.uc_planificado),
-        uc_real: parseInt(formData.uc_real),
-      });
-  
-      toast.success(esProblema ? "Problema registrado" : "Registro exitoso");
-      setFormData((prev) => ({
-        ...prev,
-        //uc_real: "",
-        //observaciones: "",
-        es_problema: false,
-      }));
-    } catch (err) {
-      toast.error("❌ Error al registrar");
-      console.error(err);
-    }
-  };
-
-
   const enviarProblema = async () => {
     if (
       !descripcionProblema.trim() ||
