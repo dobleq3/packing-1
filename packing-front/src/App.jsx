@@ -140,7 +140,7 @@ export default function RegistroEstuches() {
   };
 
   
-  const fechaActual = new Date().toISOString().split("T")[0]; // formato YYYY-MM-DD
+  //const fechaActual = new Date().toISOString().split("T")[0]; // formato YYYY-MM-DD
 
   
 
