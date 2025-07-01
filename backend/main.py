@@ -6,15 +6,16 @@ from pydantic import BaseModel
 from typing import List, Optional
 from pymongo import MongoClient, errors
 from bson import ObjectId
-import joblib
+#import joblib
 import os
 import logging
 import uvicorn
 import asyncio
+from fastapi.middleware.cors import CORSMiddleware
 
 # --- Configuración ---
-MONGO_URL = os.getenv("MONGO_URL", "mongodb://localhost:27017/produccion?authSource=admin")
-DB_NAME = "produccion"
+MONGO_URL = os.getenv("MONGO_URL", "mongodb://mongo_user:dobleq3@localhost:27017/mi_basedatos")
+DB_NAME = "mi_basedatos"
 COL_PRODUCCION = "estuches"
 COL_PROBLEMAS = "problemas"
 
@@ -23,7 +24,9 @@ app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=[
+      "https://5173-dobleq3-packing-j61l7t80bgf.ws-us120.gitpod.io"
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

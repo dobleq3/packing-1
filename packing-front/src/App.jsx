@@ -60,7 +60,7 @@ export default function RegistroEstuches() {
     };
   
     try {
-      const response = await fetch("http://localhost:8002/produccion", {
+      const response = await fetch("https://8002-dobleq3-packing-j61l7t80bgf.ws-us120.gitpod.io/produccion", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -152,7 +152,7 @@ export default function RegistroEstuches() {
     };
   
     try {
-      const response = await fetch("http://localhost:8002/problemas", {
+      const response = await fetch("https://8002-dobleq3-packing-j61l7t80bgf.ws-us120.gitpod.io/problemas", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
