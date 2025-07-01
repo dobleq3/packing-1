@@ -1,4 +1,6 @@
 from fastapi import FastAPI, HTTPException
+from fastapi import WebSocket, WebSocketDisconnect
+import json
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import List, Optional
@@ -8,6 +10,7 @@ import joblib
 import os
 import logging
 import uvicorn
+import asyncio
 
 # --- Configuración ---
 MONGO_URL = os.getenv("MONGO_URL", "mongodb://localhost:27017/produccion?authSource=admin")
@@ -30,6 +33,8 @@ app.add_middleware(
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+clientes_websocket = []
+
 # --- Conexión a MongoDB ---
 try:
     client = MongoClient(MONGO_URL, serverSelectionTimeoutMS=5000)
@@ -42,18 +47,23 @@ except errors.ServerSelectionTimeoutError as err:
 
 # --- Modelos Pydantic ---
 class ProduccionHora(BaseModel):
+    es_problema: bool
     hora: str
     linea: str
     uc_planificado: int
     nro_caja: int
     uc_real: int
     observaciones: Optional[str] = None
+    fecha_registro: Optional[str] = None
+    hora_registro: Optional[str] = None
 
 class Problema(BaseModel):
     descripcion: str
     responsable: str
     fecha: str
     status: str
+    fecha_registro: Optional[str] = None
+    hora_registro: Optional[str] = None
 
 class PrediccionInput(BaseModel):
     hora: str
@@ -66,10 +76,32 @@ class PrediccionInput(BaseModel):
 def home():
     return {"mensaje": "API de Producción de Estuches funcionando correctamente."}
 
-@app.post("/produccion")
+"""@app.post("/produccion")
 def registrar_produccion(data: ProduccionHora):
+    print(data)
     result = db[COL_PRODUCCION].insert_one(data.dict())
+    return {"id": str(result.inserted_id)}"""
+
+@app.post("/produccion")
+async def registrar_produccion(data: ProduccionHora):
+    result = db[COL_PRODUCCION].insert_one(data.dict())
+
+    mensaje = {
+        "timestamp": data.fecha_registro + "T" + (data.hora_registro or "00:00") + ":00Z",
+        "uc_real": data.uc_real,
+        "uc_planificado": data.uc_planificado,
+        "linea": data.linea,
+        "nro_caja": data.nro_caja
+    }
+
+    for ws in clientes_websocket.copy():
+        try:
+            await ws.send_text(json.dumps(mensaje))
+        except Exception:
+            clientes_websocket.remove(ws)
+
     return {"id": str(result.inserted_id)}
+
 
 @app.get("/produccion")
 def obtener_produccion():
@@ -101,6 +133,18 @@ def predecir_uc(data: PrediccionInput):
         return {"uc_estimado": int(uc_estimado[0])}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error en predicción: {str(e)}")
+    
+    
+@app.websocket("/ws/grafana")
+async def websocket_grafana(websocket: WebSocket):
+    await websocket.accept()
+    clientes_websocket.append(websocket)
+
+    try:
+        while True:
+            await asyncio.sleep(10)  # Mantiene la conexión viva pasivamente
+    except WebSocketDisconnect:
+        clientes_websocket.remove(websocket)    
     
 
 # --- Mantener el servidor escuchando ---

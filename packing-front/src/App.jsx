@@ -36,33 +36,68 @@ export default function RegistroEstuches() {
         uc_planificado: parseInt(ucGuardado),
       }));
     }
-  }, []);  
+  }, []); 
+  
+  
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-
+  
+    const now = new Date();
+    const fechaRegistro = now.toISOString().split("T")[0]; // "YYYY-MM-DD"
+    const horaRegistro = now.toTimeString().slice(0, 5);   // "HH:MM"
+  
+    const payload = {
+      es_problema: false,
+      hora: formData.hora,
+      linea: formData.linea,
+      uc_planificado: parseInt(formData.uc_planificado) || 0,
+      nro_caja: parseInt(formData.nro_caja) || 0,
+      uc_real: parseInt(formData.uc_real) || 0,
+      observaciones: formData.observaciones || "",
+      fecha_registro: fechaRegistro,
+      hora_registro: horaRegistro,
+    };
+  
     try {
-      await axios.post("http://localhost:8002/produccion", {
-        ...formData,
-        uc_planificado: parseInt(formData.uc_planificado),
-        uc_real: parseInt(formData.uc_real),
-      });
-      toast.success("Registro exitoso", {
-        position: "top-right",
-        autoClose: 5000,
-        hideProgressBar: false,
-        pauseOnHover: true,
-      });
-      setProblemaActivado(false)
-      setFormData({ ...formData, hora:"", nro_caja:"", uc_real: "", observaciones: "" });
-      console.log(formData)
+      const response = await fetch("http://localhost:8002/produccion", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      })
+      .then(res=>res.json())
+      .then(data=>{
+        console.log(data)
 
+        toast.success("Registro de producción exitoso", {
+          position: "top-right",
+          autoClose: 5000,
+          hideProgressBar: false,
+          pauseOnHover: true,
+
+        });
+
+      })
+      .catch(error=>console.log(error))
+        
+        setProblemaActivado(false);
+      setMensaje("");
+      setFormData((prev) => ({
+        ...prev,
+        hora: "",
+        uc_real: "",
+        observaciones: "",
+        nro_caja: "",
+      }));
     } catch (err) {
       console.error(err);
+      toast.error("Error al registrar");
       setMensaje("❌ Error al registrar");
     }
   };
-
+  
 
   function generarHorasTurno() {
     const ahora = new Date();
@@ -92,6 +127,11 @@ export default function RegistroEstuches() {
 
 
   const enviarProblema = async () => {
+
+    const now = new Date();
+    const fechaRegistro = now.toISOString().split("T")[0];
+    const horaRegistro = now.toTimeString().split(" ")[0].slice(0,5); // "HH:MM"
+
     if (
       !descripcionProblema.trim() ||
       !formData.responsable ||
@@ -106,23 +146,45 @@ export default function RegistroEstuches() {
       responsable: formData.responsable,
       fecha: new Date().toISOString().split("T")[0],
       status: formData.status,
+      //fecha: formData.hora, // o puedes enviar el bloque horario si es relevante
+      fecha_registro: fechaRegistro,
+      hora_registro: horaRegistro,
     };
   
     try {
-      await axios.post("http://localhost:8002/problemas", payload);
-      toast.success("Problema registrado");
-  
-      // Reset estado
-      setDescripcionProblema("");
-      setFormData((prev) => ({
-        ...prev,
-        responsable: "",
-        status: "",
-      }));
-      setProblemaActivado(true);
-      setModalAbierto(false);
+      const response = await fetch("http://localhost:8002/problemas", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      })
+      .then(res=>res.json())
+      .then(data=>{
+        console.log(data)
+        // Reset estado
+        setDescripcionProblema("");
+        setFormData((prev) => ({
+          ...prev,
+          responsable: "",
+          status: "",
+        }));
+        setProblemaActivado(true);
+        setModalAbierto(false);
+
+        toast.success("Registro de problema exitoso", {
+          position: "top-right",
+          autoClose: 5000,
+          hideProgressBar: false,
+          pauseOnHover: true,
+        });        
+
+      })
+      .catch(error=>console.log(error)) 
+
+
     } catch (error) {
-      toast.error("❌ Error al registrar problema");
+      toast.error("Error al registrar problema");
       console.error(error);
     }
   };
