@@ -50,6 +50,7 @@ except errors.ServerSelectionTimeoutError as err:
 
 # --- Modelos Pydantic ---
 class ProduccionHora(BaseModel):
+    nombre_producto: str
     es_problema: bool
     hora: str
     linea: str
@@ -87,6 +88,7 @@ def registrar_produccion(data: ProduccionHora):
 
 @app.post("/produccion")
 async def registrar_produccion(data: ProduccionHora):
+    print(data)
     result = db[COL_PRODUCCION].insert_one(data.dict())
 
     mensaje = {
