@@ -96,7 +96,8 @@ async def registrar_produccion(data: ProduccionHora):
         "uc_real": data.uc_real,
         "uc_planificado": data.uc_planificado,
         "linea": data.linea,
-        "nro_caja": data.nro_caja
+        "nro_caja": data.nro_caja,
+        "nombre_producto": data.nombre_producto
     }
 
     for ws in clientes_websocket.copy():

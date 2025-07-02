@@ -28,19 +28,20 @@ export const useFormActions = () => {
     };
 
     try {
-      const res = await fetch("https://8002-dobleq3-packing-j61l7t80bgf.ws-us120.gitpod.io/produccion", {
+      const result = await fetch("https://8002-dobleq3-packing-j61l7t80bgf.ws-us120.gitpod.io/produccion", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload)
-      });
-
-      if (!res.ok) throw new Error();
-      await res.json();
-
-      toast.success("Registro exitoso");
-      setFormData(prev => ({ ...prev, hora: "", uc_real: "", observaciones: "", nro_caja: "" }));
-      setProblemaActivado(false);
-      setMensaje("");
+      })
+      .then(res=>res.json())
+      .then(data=>{
+        console.log(data)
+        toast.success("Registro exitoso");
+        setFormData(prev => ({ ...prev, hora: "", uc_real: "", observaciones: "", nro_caja: "" }));
+        setProblemaActivado(false);
+        setMensaje("");
+      })
+      .catch(error=>console.log(error))
 
     } catch {
       toast.error("Error al registrar");
