@@ -7,7 +7,7 @@ export default defineConfig({
 
   server: {
     allowedHosts: [
-      "5173-dobleq3-packing-j61l7t80bgf.ws-us120.gitpod.io"
+      "5173-dobleq3-packing1-i8zyk8q7m4v.ws-us120.gitpod.io"
     ]
   }  
 })

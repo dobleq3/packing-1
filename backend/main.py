@@ -25,7 +25,7 @@ app = FastAPI()
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
-      "https://5173-dobleq3-packing-j61l7t80bgf.ws-us120.gitpod.io"
+      "*"
     ],
     allow_credentials=True,
     allow_methods=["*"],
