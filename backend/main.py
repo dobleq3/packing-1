@@ -50,6 +50,7 @@ except errors.ServerSelectionTimeoutError as err:
 
 # --- Modelos Pydantic ---
 class ProduccionHora(BaseModel):
+    hora: str
     nombre_producto: str
     es_problema: bool
     hora: str
@@ -97,7 +98,8 @@ async def registrar_produccion(data: ProduccionHora):
         "uc_planificado": data.uc_planificado,
         "linea": data.linea,
         "nro_caja": data.nro_caja,
-        "nombre_producto": data.nombre_producto
+        "nombre_producto": data.nombre_producto,
+        "hora": data.hora
     }
 
     for ws in clientes_websocket.copy():

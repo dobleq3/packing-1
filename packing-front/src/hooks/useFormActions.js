@@ -25,6 +25,7 @@ export const useFormActions = () => {
       observaciones: formData.observaciones || "",
       fecha_registro: now.toISOString().split("T")[0],
       hora_registro: now.toTimeString().slice(0, 5),
+      hora: formData.hora
     };
 
     try {
